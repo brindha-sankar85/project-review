@@ -1,0 +1,3 @@
+event_id,event_type,entity_id,event_version,sequence_number,timestamp,payload_json,processing_status
+EVT-DOC-101,PERMISSION_CHANGED,DOC-MED-002,1,1,2026-10-03T15:06:47.113152,"{""confidentiality_level"": ""INTERNAL""}",PROCESSED
+EVT-DOC-101,PERMISSION_CHANGED,DOC-MED-002,1,1,2026-10-03T15:07:47.113152,"{""confidentiality_level"": ""INTERNAL""}",IGNORED_DUPLICATE

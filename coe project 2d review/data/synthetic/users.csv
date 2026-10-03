@@ -1,0 +1,12 @@
+id,username,name,role,department,created_at
+USR-ADM-01,admin_chief,Dr. Arthur Vance (Chief Admin),Admin,Administration,2026-10-03T15:36:47.109066
+USR-ADM-02,admin_sec,Claire Redfield (Systems Admin),Admin,IT & Operations,2026-10-03T15:36:47.109066
+USR-MGR-01,mgr_hand,Eleanor Vance (Hospital Director),Hospital Manager,Executive Management,2026-10-03T15:36:47.109066
+USR-MGR-02,mgr_clinical,Marcus Wright (Clinical Manager),Hospital Manager,Clinical Governance,2026-10-03T15:36:47.109066
+USR-DOC-01,doc_house,Dr. Gregory House (Head Physician),Doctor,General Medicine,2026-10-03T15:36:47.109066
+USR-DOC-02,doc_shepherd,Dr. Derek Shepherd (Neurosurgeon),Doctor,Surgery,2026-10-03T15:36:47.109066
+USR-NRS-01,nurse_joy,Joy Hathaway (Head ICU Nurse),Nurse,ICU,2026-10-03T15:36:47.109066
+USR-NRS-02,nurse_jack,Jack Dawson (ER Staff Nurse),Nurse,Emergency,2026-10-03T15:36:47.109066
+USR-REC-01,rec_pam,Pam Beesly (Lead Receptionist),Receptionist,Front Desk & Admissions,2026-10-03T15:36:47.109066
+USR-INT-01,intern_jd,John Dorian (Medical Intern),Intern,General Medicine,2026-10-03T15:36:47.109066
+USR-INT-02,intern_turk,Christopher Turk (Surgical Intern),Intern,Surgery,2026-10-03T15:36:47.109066

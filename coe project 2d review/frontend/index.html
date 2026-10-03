@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Confidentiality-Aware Summarisation & Sharing Assistant</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Style CSS -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-icon"><i class="fa-solid fa-hospital-user"></i></div>
+                <div class="brand-text">
+                    <h2>MedShield AI</h2>
+                    <span>Confidentiality Assistant</span>
+                </div>
+            </div>
+
+            <!-- Current Active User Card & Quick Role Switcher -->
+            <div class="user-profile-widget" id="userProfileWidget">
+                <div class="avatar" id="userAvatar">DR</div>
+                <div class="user-info">
+                    <h4 id="currentUserName">Dr. Gregory House</h4>
+                    <span class="role-badge" id="currentUserRole">Doctor</span>
+                    <small id="currentUserDept">General Medicine</small>
+                </div>
+                <button class="switch-btn" id="openRoleModalBtn" title="Switch User Role">
+                    <i class="fa-solid fa-repeat"></i>
+                </button>
+            </div>
+
+            <nav class="nav-menu">
+                <div class="nav-section">MAIN CLINICAL</div>
+                <a href="#dashboard" class="nav-item active" data-page="dashboard"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+                <a href="#documents" class="nav-item" data-page="documents"><i class="fa-solid fa-file-medical"></i> Protocols & Docs</a>
+                <a href="#summary" class="nav-item" data-page="summary"><i class="fa-solid fa-file-waveform"></i> Generate Summary</a>
+                <a href="#sharing" class="nav-item" data-page="sharing"><i class="fa-solid fa-share-nodes"></i> Sharing Requests</a>
+                <a href="#approval" class="nav-item" data-page="approval"><i class="fa-solid fa-user-shield"></i> Human Approvals <span class="badge-count" id="pendingCountBadge">0</span></a>
+
+                <div class="nav-section">GOVERNANCE & GOALS</div>
+                <a href="#audit" class="nav-item" data-page="audit"><i class="fa-solid fa-receipt"></i> Audit Logs</a>
+                <a href="#experiments" class="nav-item" data-page="experiments"><i class="fa-solid fa-flask"></i> Experiment Suite</a>
+                <a href="#edgecases" class="nav-item" data-page="edgecases"><i class="fa-solid fa-vial-circle-check"></i> Edge Case Tests</a>
+                <a href="#events" class="nav-item" data-page="events"><i class="fa-solid fa-bolt"></i> Event Stream Processor</a>
+                <a href="#workflow" class="nav-item" data-page="workflow"><i class="fa-solid fa-sitemap"></i> Workflow Map</a>
+                <a href="#users" class="nav-item" data-page="users"><i class="fa-solid fa-users-gear"></i> User & Role Matrix</a>
+                <a href="#validation" class="nav-item" data-page="validation"><i class="fa-solid fa-comment-medical"></i> Stakeholder Feedback</a>
+                <a href="#presentation" class="nav-item" data-page="presentation"><i class="fa-solid fa-chalkboard-user"></i> Presentation Slides</a>
+                <a href="#docs" class="nav-item" data-page="docs"><i class="fa-solid fa-book-medical"></i> Documentation</a>
+            </nav>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="main-content">
+            <!-- Top Navigation Bar -->
+            <header class="topbar">
+                <div class="page-title-group">
+                    <h1 id="pageTitle">Clinical Governance Dashboard</h1>
+                    <p id="pageSubtitle">Confidentiality-aware protocol summarisation & shift handover system</p>
+                </div>
+                <div class="topbar-actions">
+                    <div class="status-indicator online">
+                        <span class="dot"></span> Backend Connected
+                    </div>
+                    <button class="btn btn-outline" id="runExperimentQuickBtn">
+                        <i class="fa-solid fa-play"></i> Run Experiments
+                    </button>
+                    <button class="btn btn-primary" id="newShareBtn">
+                        <i class="fa-solid fa-plus"></i> New Share Request
+                    </button>
+                </div>
+            </header>
+
+            <!-- Page Views Container -->
+            <div class="view-container">
+                
+                <!-- 1. DASHBOARD PAGE -->
+                <section id="page-dashboard" class="page-view active">
+                    <div class="metrics-grid">
+                        <div class="metric-card border-blue">
+                            <div class="icon-wrapper blue"><i class="fa-solid fa-file-shield"></i></div>
+                            <div class="metric-data">
+                                <h3>Accessible Protocols</h3>
+                                <div class="value" id="dashAccessibleCount">0</div>
+                                <span class="subtext">For your current role level</span>
+                            </div>
+                        </div>
+                        <div class="metric-card border-amber">
+                            <div class="icon-wrapper amber"><i class="fa-solid fa-clock"></i></div>
+                            <div class="metric-data">
+                                <h3>Pending Approvals</h3>
+                                <div class="value" id="dashPendingCount">0</div>
+                                <span class="subtext">High-impact human confirmation</span>
+                            </div>
+                        </div>
+                        <div class="metric-card border-red">
+                            <div class="icon-wrapper red"><i class="fa-solid fa-ban"></i></div>
+                            <div class="metric-data">
+                                <h3>Blocked Requests</h3>
+                                <div class="value" id="dashBlockedCount">0</div>
+                                <span class="subtext">Confidentiality protection triggers</span>
+                            </div>
+                        </div>
+                        <div class="metric-card border-green">
+                            <div class="icon-wrapper green"><i class="fa-solid fa-shield-check"></i></div>
+                            <div class="metric-data">
+                                <h3>Sensitive Leakage</h3>
+                                <div class="value" id="dashLeakageRate">0%</div>
+                                <span class="subtext">Proposed system vs 100% Baseline</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="card col-span-2">
+                            <div class="card-header">
+                                <h3><i class="fa-solid fa-layer-group"></i> Protocol Documents & Access Permission</h3>
+                                <a href="#documents" class="link-btn">View All Docs <i class="fa-solid fa-arrow-right"></i></a>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Doc ID</th>
+                                                <th>Title</th>
+                                                <th>Department</th>
+                                                <th>Classification</th>
+                                                <th>Version</th>
+                                                <th>Access Status</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="dashDocsTableBody">
+                                            <!-- Dynamically populated -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fa-solid fa-clock-rotate-left"></i> Recent Audit Events</h3>
+                            </div>
+                            <div class="card-body">
+                                <ul class="timeline-list" id="dashAuditTimeline">
+                                    <!-- Dynamically populated -->
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 2. DOCUMENTS PAGE -->
+                <section id="page-documents" class="page-view">
+                    <div class="filter-bar">
+                        <div class="search-box">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                            <input type="text" id="docSearchInput" placeholder="Search protocol title, department, or version...">
+                        </div>
+                        <div class="filter-group">
+                            <select id="docLevelFilter">
+                                <option value="ALL">All Confidentiality Levels</option>
+                                <option value="PUBLIC">PUBLIC</option>
+                                <option value="INTERNAL">INTERNAL</option>
+                                <option value="CONFIDENTIAL">CONFIDENTIAL</option>
+                                <option value="HIGHLY_CONFIDENTIAL">HIGHLY_CONFIDENTIAL</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="docs-grid" id="documentsGrid">
+                        <!-- Dynamically populated document cards -->
+                    </div>
+                </section>
+
+                <!-- 3. DOCUMENT DETAILS & SUMMARISE PAGE -->
+                <section id="page-summary" class="page-view">
+                    <div class="summary-layout">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fa-solid fa-file-lines"></i> Select Protocol to Summarise</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label>Choose Protocol Document:</label>
+                                    <select id="summaryDocSelect" class="form-control">
+                                        <!-- Dynamically populated -->
+                                    </select>
+                                </div>
+                                <div class="form-group toggle-box">
+                                    <label class="switch">
+                                        <input type="checkbox" id="useBaselineToggle">
+                                        <span class="slider round"></span>
+                                    </label>
+                                    <span>Run Experimental Baseline (No Confidentiality Redaction)</span>
+                                </div>
+                                <button class="btn btn-primary btn-block" id="generateSummaryBtn">
+                                    <i class="fa-solid fa-bolt"></i> Generate Confidentiality-Aware Summary
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card col-span-2" id="summaryOutputCard">
+                            <div class="card-header">
+                                <h3><i class="fa-solid fa-square-poll-vertical"></i> Summary & Confidentiality Analysis</h3>
+                                <span class="badge" id="summaryBadge">Ready</span>
+                            </div>
+                            <div class="card-body" id="summaryOutputContent">
+                                <div class="empty-state">
+                                    <i class="fa-solid fa-file-shield fa-3x"></i>
+                                    <p>Select a protocol document above and click 'Generate Summary' to see confidentiality-aware filtering in action.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 4. SHARING REQUESTS PAGE -->
+                <section id="page-sharing" class="page-view">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-share-nodes"></i> Hospital Protocol Sharing Request Log</h3>
+                            <button class="btn btn-primary" id="createShareModalOpenBtn"><i class="fa-solid fa-plus"></i> Create Sharing Request</button>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Req ID</th>
+                                            <th>Requester</th>
+                                            <th>Recipient</th>
+                                            <th>Document</th>
+                                            <th>Risk Level</th>
+                                            <th>Recommendation</th>
+                                            <th>Status</th>
+                                            <th>Reviewer / Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="sharingTableBody">
+                                        <!-- Dynamically populated -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 5. HUMAN APPROVAL PAGE -->
+                <section id="page-approval" class="page-view">
+                    <div class="card border-top-amber">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-user-shield"></i> High-Impact Action Human Confirmations</h3>
+                            <p class="subtitle">Mandatory human review required for sharing Confidential & Highly Confidential protocols or overriding access rules.</p>
+                        </div>
+                        <div class="card-body">
+                            <div id="pendingApprovalCards">
+                                <!-- Dynamically populated approval cards -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 6. AUDIT LOGS PAGE -->
+                <section id="page-audit" class="page-view">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-receipt"></i> System Governance Audit Log (Admin Review)</h3>
+                            <div class="filter-group">
+                                <select id="auditActionFilter">
+                                    <option value="">All Actions</option>
+                                    <option value="VIEW_DOCUMENT">VIEW_DOCUMENT</option>
+                                    <option value="GENERATE_SUMMARY">GENERATE_SUMMARY</option>
+                                    <option value="CREATE_SHARE_REQUEST">CREATE_SHARE_REQUEST</option>
+                                    <option value="APPROVE_SHARE">APPROVE_SHARE</option>
+                                    <option value="REJECT_SHARE">REJECT_SHARE</option>
+                                    <option value="OVERRIDE_RESTRICTION">OVERRIDE_RESTRICTION</option>
+                                    <option value="REDACT_CONTENT">REDACT_CONTENT</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Event ID</th>
+                                            <th>Timestamp</th>
+                                            <th>User / Role</th>
+                                            <th>Action</th>
+                                            <th>Document</th>
+                                            <th>Recipient</th>
+                                            <th>State Change</th>
+                                            <th>Override Reason</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="auditTableBody">
+                                        <!-- Dynamically populated -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 7. EXPERIMENT DASHBOARD PAGE -->
+                <section id="page-experiments" class="page-view">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-flask"></i> Measurable Experiments & Baseline Comparison</h3>
+                            <div>
+                                <button class="btn btn-outline" id="runLeakageTestBtn"><i class="fa-solid fa-bug"></i> Run Synthetic Leakage Test</button>
+                                <button class="btn btn-primary" id="runFullExperimentBtn"><i class="fa-solid fa-play"></i> Re-Run Complete Suite</button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="data-table metrics-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Metric</th>
+                                            <th>Experimental Baseline</th>
+                                            <th>Target</th>
+                                            <th>Proposed System</th>
+                                            <th>Unit</th>
+                                            <th>Validation Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="experimentTableBody">
+                                        <!-- Dynamically populated -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 8. EDGE CASE TESTS PAGE -->
+                <section id="page-edgecases" class="page-view">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-vial-circle-check"></i> Failure Mode & Edge Case Verification Suite</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="edgecase-grid" id="edgeCaseGrid">
+                                <!-- Dynamically populated test case cards -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 9. EVENT STREAM PROCESSOR PAGE -->
+                <section id="page-events" class="page-view">
+                    <div class="event-layout">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fa-solid fa-bolt"></i> Live Event Injection Playground</h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-group">
+                                    <label>Event Type:</label>
+                                    <select id="injEventType" class="form-control">
+                                        <option value="PERMISSION_CHANGED">PERMISSION_CHANGED</option>
+                                        <option value="PROTOCOL_SUPERSEDED">PROTOCOL_SUPERSEDED</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Target Entity (Document ID):</label>
+                                    <select id="injEntityId" class="form-control">
+                                        <option value="DOC-MED-002">DOC-MED-002 (Medication Protocol)</option>
+                                        <option value="DOC-INF-001">DOC-INF-001 (Infection Control)</option>
+                                        <option value="DOC-TRN-004">DOC-TRN-004 (Transfer Protocol)</option>
+                                    </select>
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label>Event Version:</label>
+                                        <input type="number" id="injEventVersion" class="form-control" value="2">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Sequence Number:</label>
+                                        <input type="number" id="injSeqNum" class="form-control" value="10">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label>Simulation Scenario:</label>
+                                    <div class="btn-group">
+                                        <button class="btn btn-sm btn-outline" id="btnSimDuplicate">Duplicate Test</button>
+                                        <button class="btn btn-sm btn-outline" id="btnSimOutOfOrder">Out-of-Order Test</button>
+                                        <button class="btn btn-sm btn-outline" id="btnSimDelayed">Delayed Test</button>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary btn-block" id="btnInjectEvent">
+                                    <i class="fa-solid fa-paper-plane"></i> Inject Event to Processor Stream
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="card col-span-2">
+                            <div class="card-header">
+                                <h3><i class="fa-solid fa-list-check"></i> Event Stream & State Version Trackers</h3>
+                            </div>
+                            <div class="card-body">
+                                <div id="eventStreamContent">
+                                    <!-- Event Log Feed -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 10. WORKFLOW MAP PAGE -->
+                <section id="page-workflow" class="page-view">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-sitemap"></i> Field Workflow Architecture & Shift Handover Map</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="workflow-diagram">
+                                <div class="wf-step">
+                                    <div class="wf-icon"><i class="fa-solid fa-file-pen"></i></div>
+                                    <h4>1. Protocol Update</h4>
+                                    <p>Clinical governance publishes updated standard protocol.</p>
+                                </div>
+                                <div class="wf-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+
+                                <div class="wf-step">
+                                    <div class="wf-icon"><i class="fa-solid fa-tags"></i></div>
+                                    <h4>2. Confidentiality Label</h4>
+                                    <p>Assigned level (Public, Internal, Confidential, Highly Confidential).</p>
+                                </div>
+                                <div class="wf-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+
+                                <div class="wf-step">
+                                    <div class="wf-icon"><i class="fa-solid fa-user-lock"></i></div>
+                                    <h4>3. Shift Handover Request</h4>
+                                    <p>Shift staff member requests document summary.</p>
+                                </div>
+                                <div class="wf-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+
+                                <div class="wf-step">
+                                    <div class="wf-icon"><i class="fa-solid fa-filter"></i></div>
+                                    <h4>4. RBAC Redaction Engine</h4>
+                                    <p>Unauthorised sensitive sections stripped prior to summary.</p>
+                                </div>
+                                <div class="wf-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+
+                                <div class="wf-step highlight">
+                                    <div class="wf-icon"><i class="fa-solid fa-user-check"></i></div>
+                                    <h4>5. Human Confirmation</h4>
+                                    <p>High-impact sharing requests require reviewer approval & mandatory override reason.</p>
+                                </div>
+                                <div class="wf-arrow"><i class="fa-solid fa-arrow-right"></i></div>
+
+                                <div class="wf-step">
+                                    <div class="wf-icon"><i class="fa-solid fa-box-archive"></i></div>
+                                    <h4>6. Immutable Audit Log</h4>
+                                    <p>All access, summary, and override records logged for governance audit.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 11. USERS PAGE -->
+                <section id="page-users" class="page-view">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-users-gear"></i> Synthetic Hospital User Directory & Permission Matrix</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>User ID</th>
+                                            <th>Name</th>
+                                            <th>Role</th>
+                                            <th>Department</th>
+                                            <th>Allowed Confidentiality Levels</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="usersTableBody">
+                                        <!-- Dynamically populated -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 12. VALIDATION FEEDBACK PAGE -->
+                <section id="page-validation" class="page-view">
+                    <div class="grid-2col">
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fa-solid fa-pen-to-square"></i> Stakeholder Validation Form</h3>
+                            </div>
+                            <div class="card-body">
+                                <form id="feedbackForm">
+                                    <div class="form-group">
+                                        <label>Was the recommendation understandable?</label>
+                                        <select id="valRecClear" class="form-control">
+                                            <option value="true">Yes - Clear and simple</option>
+                                            <option value="false">No - Confusing</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Was the reason for withholding content clear?</label>
+                                        <select id="valReasonClear" class="form-control">
+                                            <option value="true">Yes - Plain language explanation provided</option>
+                                            <option value="false">No - Unclear</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Overall System Usability Rating (1 to 5):</label>
+                                        <input type="number" id="valRating" class="form-control" min="1" max="5" value="5">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Reviewer Comments / Clinical Feedback:</label>
+                                        <textarea id="valComments" class="form-control" rows="3" placeholder="Enter clinical reviewer feedback..."></textarea>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-check"></i> Submit Feedback</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header">
+                                <h3><i class="fa-solid fa-chart-pie"></i> Validation Analytics & Stakeholder Score</h3>
+                            </div>
+                            <div class="card-body" id="validationAnalyticsContent">
+                                <!-- Dynamically populated -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 13. PRESENTATION SLIDES PAGE -->
+                <section id="page-presentation" class="page-view">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-chalkboard-user"></i> Project Presentation Slides Deck (12 Slides)</h3>
+                            <div class="slide-nav-controls">
+                                <button class="btn btn-sm btn-outline" id="prevSlideBtn"><i class="fa-solid fa-chevron-left"></i> Previous</button>
+                                <span id="slideCounter">Slide 1 of 12</span>
+                                <button class="btn btn-sm btn-outline" id="nextSlideBtn">Next <i class="fa-solid fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="slide-viewport" id="slideViewport">
+                                <!-- Interactive slide content rendered dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 14. DOCUMENTATION PAGE -->
+                <section id="page-docs" class="page-view">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3><i class="fa-solid fa-book"></i> Technical Documentation & System Specifications</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="docs-tabs">
+                                <button class="doc-tab active" data-doc="arch">Architecture</button>
+                                <button class="doc-tab" data-doc="exp">Experiments</button>
+                                <button class="doc-tab" data-doc="fail">Failure Analysis</button>
+                                <button class="doc-tab" data-doc="api">API Docs</button>
+                            </div>
+                            <div class="doc-content-body" id="docTabContent">
+                                <!-- Documentation view content -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- ROLE SELECTION MODAL -->
+    <div class="modal" id="roleModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-gear"></i> Switch Active Hospital User Role</h3>
+                <button class="close-btn" id="closeRoleModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Select a synthetic user to simulate their document access permissions and role capabilities:</p>
+                <div class="role-grid" id="roleSelectionGrid">
+                    <!-- Dynamically populated -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CREATE SHARING REQUEST MODAL -->
+    <div class="modal" id="shareModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-share-nodes"></i> Create New Protocol Sharing Request</h3>
+                <button class="close-btn" id="closeShareModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="shareForm">
+                    <div class="form-group">
+                        <label>Select Protocol Document:</label>
+                        <select id="shareDocSelect" class="form-control" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Select Recipient Staff Member:</label>
+                        <select id="shareRecipientSelect" class="form-control" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Reason for Sharing:</label>
+                        <textarea id="shareReasonInput" class="form-control" rows="3" placeholder="Explain why this document needs to be shared..." required></textarea>
+                    </div>
+                    
+                    <div class="risk-preview-box" id="riskPreviewBox" style="display:none;">
+                        <!-- Dynamic risk level & rule explanation preview -->
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block"><i class="fa-solid fa-paper-plane"></i> Submit Sharing Request</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- HUMAN CONFIRMATION & OVERRIDE MODAL -->
+    <div class="modal" id="humanConfirmModal">
+        <div class="modal-content modal-warning">
+            <div class="modal-header header-amber">
+                <h3><i class="fa-solid fa-triangle-exclamation"></i> High-Impact Action Human Confirmation Required</h3>
+                <button class="close-btn" id="closeHumanConfirmModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="humanConfirmDetails"></div>
+
+                <div class="form-group" id="overrideReasonGroup">
+                    <label class="required-label">Enter Override Justification (MANDATORY):</label>
+                    <textarea id="humanOverrideReasonInput" class="form-control" rows="3" placeholder="Provide clinical or operational justification for overriding access restrictions..."></textarea>
+                    <small class="text-danger" id="overrideErrorMsg" style="display:none;">Override justification is mandatory! Empty reasons are rejected.</small>
+                </div>
+
+                <div class="btn-row">
+                    <button class="btn btn-danger" id="confirmRejectBtn"><i class="fa-solid fa-xmark"></i> REJECT</button>
+                    <button class="btn btn-success" id="confirmApproveBtn"><i class="fa-solid fa-check"></i> APPROVE WITH OVERRIDE</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application Script -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

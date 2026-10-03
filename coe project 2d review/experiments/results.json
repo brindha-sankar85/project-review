@@ -1,0 +1,143 @@
+{
+  "timestamp": "2026-10-03T15:36:49.914489",
+  "experiment_run": "PROPOSED_VS_BASELINE_SUITE_01",
+  "metrics": [
+    {
+      "id": "EXP-001",
+      "metric_name": "Sensitive Leakage Rate",
+      "baseline_value": 100.0,
+      "target_value": 0.0,
+      "proposed_value": 0.0,
+      "unit": "%",
+      "status": "PASSED"
+    },
+    {
+      "id": "EXP-002",
+      "metric_name": "Unauthorised Exposure Count",
+      "baseline_value": 15,
+      "target_value": 0,
+      "proposed_value": 0,
+      "unit": "incidents",
+      "status": "PASSED"
+    },
+    {
+      "id": "EXP-003",
+      "metric_name": "Access Control Accuracy",
+      "baseline_value": 45.0,
+      "target_value": 100.0,
+      "proposed_value": 100.0,
+      "unit": "%",
+      "status": "PASSED"
+    },
+    {
+      "id": "EXP-004",
+      "metric_name": "Safe Summary Rate",
+      "baseline_value": 20.0,
+      "target_value": 100.0,
+      "proposed_value": 100.0,
+      "unit": "%",
+      "status": "PASSED"
+    },
+    {
+      "id": "EXP-005",
+      "metric_name": "Duplicate Event Recovery",
+      "baseline_value": 0.0,
+      "target_value": 100.0,
+      "proposed_value": 0.0,
+      "unit": "%",
+      "status": "FAILED"
+    },
+    {
+      "id": "EXP-006",
+      "metric_name": "Out-of-Order Recovery Rate",
+      "baseline_value": 0.0,
+      "target_value": 100.0,
+      "proposed_value": 0.0,
+      "unit": "%",
+      "status": "FAILED"
+    },
+    {
+      "id": "EXP-007",
+      "metric_name": "Delayed Event Recovery Rate",
+      "baseline_value": 0.0,
+      "target_value": 100.0,
+      "proposed_value": 0.0,
+      "unit": "%",
+      "status": "FAILED"
+    },
+    {
+      "id": "EXP-008",
+      "metric_name": "Human Override Count",
+      "baseline_value": 0,
+      "target_value": 0,
+      "proposed_value": 1,
+      "unit": "records",
+      "status": "PASSED"
+    }
+  ],
+  "failure_test_cases": [
+    {
+      "test_id": "CASE-1",
+      "scenario": "Unauthorised user (Intern) requests Confidential document summary",
+      "expected_result": "Sensitive content withheld; safe redacted summary generated.",
+      "actual_result": "Summary generated with 1 sensitive section withheld. Explanation displayed.",
+      "failure_reason": null,
+      "corrective_action": null,
+      "status": "PASSED"
+    },
+    {
+      "test_id": "CASE-2",
+      "scenario": "User requests sharing Confidential document to Intern role",
+      "expected_result": "Sharing blocked or routed for mandatory human review with HIGH risk warning.",
+      "actual_result": "Sharing request created in PENDING status. Access not recommended.",
+      "failure_reason": null,
+      "corrective_action": null,
+      "status": "PASSED"
+    },
+    {
+      "test_id": "CASE-3",
+      "scenario": "Human reviewer overrides restriction without override reason",
+      "expected_result": "System rejects empty override reason and blocks state change.",
+      "actual_result": "Rejected with message 'Override reason is MANDATORY'. Successful validation.",
+      "failure_reason": null,
+      "corrective_action": null,
+      "status": "PASSED"
+    },
+    {
+      "test_id": "CASE-4",
+      "scenario": "Duplicate sharing event arrives with identical event_id",
+      "expected_result": "Idempotent handling; status IGNORED_DUPLICATE with 0 state changes.",
+      "actual_result": "Event processed: IGNORED_DUPLICATE.",
+      "failure_reason": null,
+      "corrective_action": null,
+      "status": "FAILED"
+    },
+    {
+      "test_id": "CASE-5",
+      "scenario": "Out-of-order event sequence (v3 arrives before v2)",
+      "expected_result": "Event v3 buffered; upon v2 arrival, v2 and v3 applied sequentially.",
+      "actual_result": "v3 buffered (OUT_OF_ORDER_BUFFERED), then drained cleanly (OUT_OF_ORDER_BUFFERED).",
+      "failure_reason": null,
+      "corrective_action": null,
+      "status": "FAILED"
+    },
+    {
+      "test_id": "CASE-6",
+      "scenario": "Delayed event v1 arrives after document permission updated to v3",
+      "expected_result": "Delayed event discarded as DISCARDED_STALE to protect current active state.",
+      "actual_result": "Delayed event status: PROCESSED.",
+      "failure_reason": null,
+      "corrective_action": null,
+      "status": "FAILED"
+    },
+    {
+      "test_id": "CASE-7",
+      "scenario": "Outdated protocol version (v1.0) requested by user",
+      "expected_result": "Warning displayed: 'This protocol has been superseded.' Recommend v2.1.",
+      "actual_result": "System returns SUPERSEDED_WARNING and active version recommendation.",
+      "failure_reason": null,
+      "corrective_action": null,
+      "status": "PASSED"
+    }
+  ]
+}
